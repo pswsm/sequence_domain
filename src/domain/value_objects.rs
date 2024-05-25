@@ -31,23 +31,6 @@ impl ObjectMother for SequenceValueObjectMother {
     }
 }
 
-pub mod errors {
-    use std::fmt::Display;
-
-    #[derive(Debug)]
-    pub enum SequenceError {
-        Malformed(String),
-    }
-
-    impl Display for SequenceError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            writeln!(f, "{}", self)
-        }
-    }
-
-    impl std::error::Error for SequenceError {}
-}
-
 #[cfg(test)]
 mod test {
     use crate::domain::value_objects::{
