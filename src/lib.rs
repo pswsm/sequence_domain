@@ -1,8 +1,5 @@
 pub mod domain;
-
-pub(crate) trait ObjectMother {
-    fn build() -> Self;
-}
+pub mod shared;
 
 #[cfg(test)]
 mod libs {
@@ -11,7 +8,7 @@ mod libs {
     use super::*;
 
     fn setup() -> Sequence {
-        Sequence::new(Some(SequenceType::Rna), "atcg").unwrap()
+        Sequence::new(SequenceType::Rna, "atcg").unwrap()
     }
 
     #[test]
