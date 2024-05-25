@@ -36,16 +36,6 @@ mod tests {
     use crate::ObjectMother;
     use crate::domain::value_objects::{SequenceValueObjectMother, SequenceValueObject}
 
-    macro_rules! setup {
-        ($objectMother:ident, $sequence:ident) => {
-            let $objectMother = SequenceValueObjectMother::build();
-            let $sequence: Sequence = Sequence {
-                variant: super::SequenceType::Dna,
-                sequence: $objectMother,
-            };
-        };
-    }
-
     mod seq {
         use crate::domain::{Sequence, SequenceType};
 

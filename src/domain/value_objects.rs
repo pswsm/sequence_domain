@@ -37,12 +37,6 @@ mod test {
         ObjectMother, SequenceValueObject, SequenceValueObjectMother,
     };
 
-    macro_rules! setup {
-        ($objectMother:ident) => {
-            let $objectMother = SequenceValueObjectMother::build();
-        };
-    }
-
     #[test]
     fn should_create_seqvobj() {
         assert!(SequenceValueObject::new("atcg").is_ok())
