@@ -1,4 +1,8 @@
-use self::value_objects::{errors::SequenceError, SequenceValueObject};
+use crate::shared::errors::errors::SequenceError;
+
+use self::value_objects::SequenceValueObject;
+
+pub(crate) mod value_objects;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum SequenceType {
@@ -6,20 +10,15 @@ pub enum SequenceType {
     Rna,
 }
 
-mod value_objects;
-
 pub struct Sequence {
     variant: SequenceType,
     sequence: SequenceValueObject,
 }
 
 impl Sequence {
-    pub fn new<T: ToString>(
-        variant: Option<SequenceType>,
-        sequence: T,
-    ) -> Result<Self, SequenceError> {
+    pub fn new<T: ToString>(variant: SequenceType, sequence: T) -> Result<Self, SequenceError> {
         Ok(Sequence {
-            variant: variant.unwrap_or(SequenceType::Dna),
+            variant,
             sequence: SequenceValueObject::new(sequence)?,
         })
     }
@@ -33,31 +32,32 @@ impl Sequence {
 
 #[cfg(test)]
 mod tests {
-    use crate::ObjectMother;
-    use crate::domain::value_objects::{SequenceValueObjectMother, SequenceValueObject}
-
     mod seq {
-        use crate::domain::{Sequence, SequenceType};
+        use crate::{
+            domain::{Sequence, SequenceType},
+            setup,
+            shared::value_objects::{ObjectMother, SequenceObjectMother},
+        };
 
         #[test]
         fn should_create_new() {
-            setup!(test_value_object, test_sequence);
-            let built_sequence = Sequence::new(None, "atcg".to_string()).unwrap();
+            setup!(common_mother, _common_child, SequenceObjectMother, Sequence);
+            let manual_sequence: Sequence = Sequence::new(SequenceType::Dna, "atcg").unwrap();
 
-            assert_eq!(&built_sequence.variant(), &test_sequence.variant());
-            assert_eq!(&built_sequence.sequence(), &test_sequence.sequence());
+            assert_eq!(manual_sequence.variant(), &common_mother.variant);
+            assert_eq!(manual_sequence.sequence(), &common_mother.sequence);
         }
 
         #[test]
         fn should_return_variant() {
-            setup!(test_value_object, test_sequence);
-            assert_eq!(test_sequence.variant(), &SequenceType::Dna);
+            setup!(common_mother, common_child, SequenceObjectMother, Sequence);
+            assert_eq!(common_child.variant(), &common_mother.variant);
         }
 
         #[test]
         fn should_return_sequence() {
-            setup!(test_value_object, test_sequence);
-            assert_eq!(test_sequence.sequence(), &test_value_object);
+            setup!(common_mother, common_child, SequenceObjectMother, Sequence);
+            assert_eq!(common_child.sequence(), &common_mother.sequence);
         }
     }
 }

@@ -1,6 +1,6 @@
-use crate::ObjectMother;
+use std::fmt::Display;
 
-use self::errors::SequenceError;
+use crate::shared::errors::errors::SequenceError;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct SequenceValueObject {
@@ -12,29 +12,23 @@ impl SequenceValueObject {
         let bind: String = value.to_string();
         match &bind.chars().all(|c| ['a', 't', 'c', 'g', 'u'].contains(&c)) {
             true => Ok(Self { value: bind }),
-            false => Err(SequenceError::Malformed(format!("WAWAWA or sum"))),
+            false => Err(SequenceError::Malformed("WAWAWA or sum".to_string())),
         }
     }
 }
 
-pub(crate) struct SequenceValueObjectMother {
-    pub child: SequenceValueObject,
-}
-
-impl ObjectMother for SequenceValueObjectMother {
-    fn build() -> Self {
-        Self {
-            child: SequenceValueObject {
-                value: "atcg".to_owned(),
-            },
-        }
+impl Display for SequenceValueObject {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::domain::value_objects::{
-        ObjectMother, SequenceValueObject, SequenceValueObjectMother,
+    use crate::{
+        domain::value_objects::SequenceValueObject,
+        setup,
+        shared::value_objects::{ObjectMother, SequenceValueObjectMother},
     };
 
     #[test]
@@ -44,9 +38,14 @@ mod test {
 
     #[test]
     fn wawa() {
-        setup!(vobj);
+        setup!(
+            _common_mother,
+            common_child,
+            SequenceValueObjectMother,
+            SequenceValueObject
+        );
         assert_eq!(
-            vobj.child,
+            common_child,
             SequenceValueObject {
                 value: "atcg".to_owned()
             }
