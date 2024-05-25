@@ -36,7 +36,7 @@ mod tests {
         use crate::{
             domain::{Sequence, SequenceType},
             setup,
-            shared::value_objects::{ObjectMother, SequenceObjectMother},
+            shared::object_mothers::{ObjectMother, SequenceObjectMother},
         };
 
         #[test]
