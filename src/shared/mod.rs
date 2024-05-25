@@ -1,5 +1,5 @@
 pub mod errors;
-pub mod value_objects;
+pub mod object_mothers;
 
 pub mod test_utils {
     #[macro_export]
