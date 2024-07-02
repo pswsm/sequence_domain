@@ -1,16 +1,25 @@
-pub mod errors {
-    use std::fmt::Display;
+use std::fmt::Display;
 
-    #[derive(Debug)]
-    pub enum SequenceError {
-        Malformed(String),
-    }
+#[derive(Debug)]
+pub struct MalformedSequence {
+    message: String,
+}
 
-    impl Display for SequenceError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            writeln!(f, "dlkgflksm")
+impl MalformedSequence {
+    pub fn new<T>(message: &T) -> Self
+    where
+        T: ToString + ?Sized,
+    {
+        Self {
+            message: message.to_string(),
         }
     }
-
-    impl std::error::Error for SequenceError {}
 }
+
+impl Display for MalformedSequence {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}", self.message)
+    }
+}
+
+impl std::error::Error for MalformedSequence {}

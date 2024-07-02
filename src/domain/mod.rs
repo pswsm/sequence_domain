@@ -1,6 +1,6 @@
-use crate::shared::errors::errors::SequenceError;
+use crate::shared::errors::MalformedSequence;
 
-use self::value_objects::SequenceValueObject;
+use self::value_objects::{DnaSequenceValueObject, RnaSequenceValueObject, SequenceValueTrait};
 
 pub(crate) mod value_objects;
 
@@ -10,22 +10,33 @@ pub enum SequenceType {
     Rna,
 }
 
-pub struct Sequence {
-    variant: SequenceType,
-    sequence: SequenceValueObject,
+pub struct Sequence<T>
+where
+    T: SequenceValueTrait,
+{
+    sequence: T,
 }
 
-impl Sequence {
-    pub fn new<T: ToString>(variant: SequenceType, sequence: T) -> Result<Self, SequenceError> {
+impl Sequence<DnaSequenceValueObject> {
+    pub fn new(sequence: &str) -> Result<Self, MalformedSequence> {
         Ok(Sequence {
-            variant,
-            sequence: SequenceValueObject::new(sequence)?,
+            sequence: DnaSequenceValueObject::new(sequence)?,
         })
     }
-    pub fn variant(&self) -> &SequenceType {
-        &self.variant
+    #[must_use]
+    pub fn sequence(&self) -> &DnaSequenceValueObject {
+        &self.sequence
     }
-    pub fn sequence(&self) -> &SequenceValueObject {
+}
+
+impl Sequence<RnaSequenceValueObject> {
+    pub fn new(sequence: &str) -> Result<Self, MalformedSequence> {
+        Ok(Sequence {
+            sequence: RnaSequenceValueObject::new(sequence)?,
+        })
+    }
+    #[must_use]
+    pub fn sequence(&self) -> &RnaSequenceValueObject {
         &self.sequence
     }
 }
@@ -34,30 +45,38 @@ impl Sequence {
 mod tests {
     mod seq {
         use crate::{
-            domain::{Sequence, SequenceType},
-            setup,
-            shared::object_mothers::{ObjectMother, SequenceObjectMother},
+            domain::{value_objects::DnaSequenceValueObject, Sequence},
+            setup_mother_child,
+            shared::object_mothers::{DnaSequenceObjectMother, ObjectMother},
         };
 
         #[test]
         fn should_create_new() {
-            setup!(common_mother, _common_child, SequenceObjectMother, Sequence);
-            let manual_sequence: Sequence = Sequence::new(SequenceType::Dna, "atcg").unwrap();
-
-            assert_eq!(manual_sequence.variant(), &common_mother.variant);
-            assert_eq!(manual_sequence.sequence(), &common_mother.sequence);
+            setup_mother_child!(
+                common_mother,
+                _common_child,
+                DnaSequenceObjectMother,
+                Sequence<DnaSequenceValueObject>
+            );
+            let manual_sequence: Sequence<DnaSequenceValueObject> =
+                Sequence::<DnaSequenceValueObject>::new("atcg").unwrap();
+            assert_eq!(
+                &manual_sequence.sequence().to_string(),
+                &common_mother.sequence
+            );
         }
-
-        #[test]
-        fn should_return_variant() {
-            setup!(common_mother, common_child, SequenceObjectMother, Sequence);
-            assert_eq!(common_child.variant(), &common_mother.variant);
-        }
-
         #[test]
         fn should_return_sequence() {
-            setup!(common_mother, common_child, SequenceObjectMother, Sequence);
-            assert_eq!(common_child.sequence(), &common_mother.sequence);
+            setup_mother_child!(
+                common_mother,
+                common_child,
+                DnaSequenceObjectMother,
+                Sequence<DnaSequenceValueObject>
+            );
+            assert_eq!(
+                &common_child.sequence().to_string(),
+                &common_mother.sequence
+            );
         }
     }
 }

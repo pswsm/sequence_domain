@@ -1,41 +1,58 @@
-use crate::domain::{value_objects::SequenceValueObject, Sequence, SequenceType};
+use crate::domain::{
+    value_objects::{DnaSequenceValueObject, RnaSequenceValueObject},
+    Sequence,
+};
 
-pub(crate) trait ObjectMother {
+pub trait ObjectMother {
     type Item;
     fn build(self) -> Self::Item;
     fn init() -> Self;
 }
 
-pub struct SequenceValueObjectMother {
-    pub value: String,
+pub struct DnaSequenceObjectMother {
+    pub sequence: String,
 }
 
-impl ObjectMother for SequenceValueObjectMother {
-    type Item = SequenceValueObject;
-    fn build(self) -> Self::Item {
-        SequenceValueObject::new(self.value).unwrap()
-    }
-    fn init() -> Self {
+impl DnaSequenceObjectMother {
+    fn with_sequence(self, sequence: &str) -> Self {
         Self {
-            value: "atcg".to_string(),
+            sequence: sequence.to_string(),
         }
     }
 }
 
-pub struct SequenceObjectMother {
-    pub variant: SequenceType,
-    pub sequence: SequenceValueObject,
-}
-
-impl ObjectMother for SequenceObjectMother {
-    type Item = Sequence;
+impl ObjectMother for DnaSequenceObjectMother {
+    type Item = Sequence<DnaSequenceValueObject>;
     fn build(self) -> Self::Item {
-        Sequence::new(self.variant, self.sequence).unwrap()
+        Self::Item::new(&self.sequence).unwrap()
     }
     fn init() -> Self {
         Self {
-            variant: SequenceType::Dna,
-            sequence: SequenceValueObjectMother::init().build(),
+            sequence: "atcg".to_string(),
+        }
+    }
+}
+
+pub struct RnaSequenceObjectMother {
+    pub sequence: String,
+}
+
+impl RnaSequenceObjectMother {
+    fn with_sequence(self, sequence: &str) -> Self {
+        Self {
+            sequence: sequence.to_string(),
+        }
+    }
+}
+
+impl ObjectMother for RnaSequenceObjectMother {
+    type Item = Sequence<RnaSequenceValueObject>;
+    fn build(self) -> Self::Item {
+        Self::Item::new(&self.sequence).unwrap()
+    }
+    fn init() -> Self {
+        Self {
+            sequence: "aucg".to_string(),
         }
     }
 }
