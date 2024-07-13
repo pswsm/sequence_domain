@@ -31,10 +31,18 @@ pub struct RnaSequenceValueObject(SequenceValueObject);
 impl RnaSequenceValueObject {
     pub fn new(value: &str) -> Result<Self, MalformedSequence> {
         let self_allowed_characters: [char; 4] = Self::sequence_allowed_chars();
-        if value.chars().all(|c| self_allowed_characters.contains(&c)) {
+        let illegal_chars: Vec<String> = value
+            .chars()
+            .filter(|c| !self_allowed_characters.contains(c))
+            .map(|c| c.to_string())
+            .collect();
+        if illegal_chars.is_empty() {
             Ok(Self(SequenceValueObject::new(value)))
         } else {
-            Err(MalformedSequence::new("Sequence malformed :roto2:"))
+            Err(MalformedSequence::new(
+                &illegal_chars,
+                super::SequenceType::Rna,
+            ))
         }
     }
 }
@@ -63,10 +71,18 @@ impl Display for DnaSequenceValueObject {
 impl DnaSequenceValueObject {
     pub fn new(value: &str) -> Result<Self, MalformedSequence> {
         let self_allowed_characters: [char; 4] = Self::sequence_allowed_chars();
-        if value.chars().all(|c| self_allowed_characters.contains(&c)) {
+        let illegal_chars: Vec<String> = value
+            .chars()
+            .filter(|c| !self_allowed_characters.contains(c))
+            .map(|c| c.to_string())
+            .collect();
+        if illegal_chars.is_empty() {
             Ok(Self(SequenceValueObject::new(value)))
         } else {
-            Err(MalformedSequence::new("Sequence malformed :roto2:"))
+            Err(MalformedSequence::new(
+                &illegal_chars,
+                super::SequenceType::Dna,
+            ))
         }
     }
 }
@@ -79,7 +95,13 @@ impl SequenceValueTrait for DnaSequenceValueObject {
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::value_objects::{DnaSequenceValueObject, RnaSequenceValueObject};
+    use crate::{
+        domain::{
+            value_objects::{DnaSequenceValueObject, RnaSequenceValueObject},
+            SequenceType,
+        },
+        shared::errors::MalformedSequence,
+    };
 
     #[test]
     fn should_create_rna_sequence_value_object() {
@@ -98,6 +120,14 @@ mod tests {
 
     #[test]
     fn should_error_dna_sequence_value_object() {
-        assert!(DnaSequenceValueObject::new("aucg").is_err())
+        let error_dna: Result<DnaSequenceValueObject, MalformedSequence> =
+            DnaSequenceValueObject::new("aucg");
+        assert!(error_dna.as_ref().is_err_and(
+            |e| e.illegal_chars == vec!["u".to_string()] && e.kind == SequenceType::Dna
+        ));
+        assert!(
+            error_dna.unwrap_err().to_string()
+                == format!("Illegal characters: 'u' are not allowed in dna")
+        )
     }
 }

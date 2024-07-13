@@ -1,24 +1,33 @@
 use std::fmt::Display;
 
+use crate::domain::SequenceType;
+
 #[derive(Debug)]
 pub struct MalformedSequence {
-    message: String,
+    pub illegal_chars: Vec<String>,
+    pub kind: SequenceType,
 }
 
 impl MalformedSequence {
-    pub fn new<T>(message: &T) -> Self
-    where
-        T: ToString + ?Sized,
-    {
+    pub fn new(illegal_chars: &[String], kind: SequenceType) -> Self {
         Self {
-            message: message.to_string(),
+            illegal_chars: illegal_chars
+                .iter()
+                .map(std::string::ToString::to_string)
+                .collect(),
+            kind,
         }
     }
 }
 
 impl Display for MalformedSequence {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.message)
+        write!(
+            f,
+            "Illegal characters: '{}' are not allowed in {}",
+            self.illegal_chars.join(", "),
+            self.kind
+        )
     }
 }
 
