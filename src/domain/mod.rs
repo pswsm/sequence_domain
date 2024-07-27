@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::shared::errors::MalformedSequence;
 
-use self::value_objects::{DnaSequenceValueObject, RnaSequenceValueObject, SequenceValueTrait};
+use self::value_objects::{DnaSequenceValueObject, RnaSequenceValueObject, SequenceValue};
 
 pub(crate) mod value_objects;
 
@@ -24,7 +24,7 @@ impl Display for SequenceType {
 #[derive(Debug, PartialEq)]
 pub struct Sequence<T>
 where
-    T: SequenceValueTrait,
+    T: SequenceValue,
 {
     sequence: T,
 }
@@ -44,13 +44,12 @@ impl Sequence<DnaSequenceValueObject> {
         &self.sequence
     }
 
-    pub fn to_rna(&self) -> Sequence<RnaSequenceValueObject> {
-        Sequence {
+    pub fn to_rna(&self) -> Result<Sequence<RnaSequenceValueObject>, MalformedSequence> {
+        Ok(Sequence {
             sequence: RnaSequenceValueObject::new(
-                &self.get_sequence().to_string().replace("t", "u"),
-            )
-            .unwrap(),
-        }
+                &self.get_sequence().to_string().replace('t', "u"),
+            )?,
+        })
     }
 }
 
@@ -68,13 +67,12 @@ impl Sequence<RnaSequenceValueObject> {
     pub fn get_sequence(&self) -> &RnaSequenceValueObject {
         &self.sequence
     }
-    pub fn to_dna(&self) -> Sequence<DnaSequenceValueObject> {
-        Sequence {
+    pub fn to_dna(&self) -> Result<Sequence<DnaSequenceValueObject>, MalformedSequence> {
+        Ok(Sequence {
             sequence: DnaSequenceValueObject::new(
-                &self.get_sequence().to_string().replace("u", "t"),
-            )
-            .unwrap(),
-        }
+                &self.get_sequence().to_string().replace('u', "t"),
+            )?,
+        })
     }
 }
 

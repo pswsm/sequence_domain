@@ -4,17 +4,14 @@ use crate::domain::SequenceType;
 
 #[derive(Debug)]
 pub struct MalformedSequence {
-    pub illegal_chars: Vec<String>,
+    pub illegal_chars: Vec<char>,
     pub kind: SequenceType,
 }
 
 impl MalformedSequence {
-    pub fn new(illegal_chars: &[String], kind: SequenceType) -> Self {
+    pub fn new(illegal_chars: Vec<char>, kind: SequenceType) -> Self {
         Self {
-            illegal_chars: illegal_chars
-                .iter()
-                .map(std::string::ToString::to_string)
-                .collect(),
+            illegal_chars,
             kind,
         }
     }
@@ -25,7 +22,11 @@ impl Display for MalformedSequence {
         write!(
             f,
             "Illegal characters: '{}' are not allowed in {}",
-            self.illegal_chars.join(", "),
+            self.illegal_chars
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<String>>()
+                .join(", "),
             self.kind
         )
     }
