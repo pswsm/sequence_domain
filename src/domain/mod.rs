@@ -44,11 +44,9 @@ impl Sequence<DnaSequenceValueObject> {
         &self.sequence
     }
 
-    pub fn to_rna(&self) -> Result<Sequence<RnaSequenceValueObject>, MalformedSequence> {
+    pub fn to_rna(self) -> Result<Sequence<RnaSequenceValueObject>, MalformedSequence> {
         Ok(Sequence {
-            sequence: RnaSequenceValueObject::new(
-                &self.get_sequence().to_string().replace('t', "u"),
-            )?,
+            sequence: self.sequence.into(),
         })
     }
 }
@@ -67,12 +65,12 @@ impl Sequence<RnaSequenceValueObject> {
     pub fn get_sequence(&self) -> &RnaSequenceValueObject {
         &self.sequence
     }
-    pub fn to_dna(&self) -> Result<Sequence<DnaSequenceValueObject>, MalformedSequence> {
-        Ok(Sequence {
-            sequence: DnaSequenceValueObject::new(
-                &self.get_sequence().to_string().replace('u', "t"),
-            )?,
-        })
+
+    /// Converts this RNA to DNA
+    pub fn to_dna(self) -> Sequence<DnaSequenceValueObject> {
+        Sequence {
+            sequence: self.sequence.into(),
+        }
     }
 }
 
@@ -127,7 +125,7 @@ mod tests {
                 .with_sequence("atcg")
                 .build();
 
-            assert_eq!(dna.to_rna(), rna)
+            assert_eq!(dna.to_rna().unwrap(), rna)
         }
         #[test]
         fn should_change_to_dna() {

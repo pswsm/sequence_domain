@@ -87,6 +87,22 @@ impl DnaSequenceValueObject {
     }
 }
 
+impl From<DnaSequenceValueObject> for RnaSequenceValueObject {
+    fn from(value: DnaSequenceValueObject) -> Self {
+        Self(SequenceValueObject::new(
+            &value.0.to_string().replace('t', "u"),
+        ))
+    }
+}
+
+impl From<RnaSequenceValueObject> for DnaSequenceValueObject {
+    fn from(value: RnaSequenceValueObject) -> Self {
+        Self(SequenceValueObject::new(
+            &value.0.to_string().replace('u', "t"),
+        ))
+    }
+}
+
 impl SequenceValue for DnaSequenceValueObject {
     fn sequence_allowed_chars() -> [char; 4] {
         ['a', 't', 'g', 'c']
